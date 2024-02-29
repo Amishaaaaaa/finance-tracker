@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema(
     { username: String,
       email: String,
       password: String ,
-      sectors: [{
+      mysectors: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Sector'
       }]

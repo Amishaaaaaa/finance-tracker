@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const userMiddleware = require("../middleware/user");
 const { User, Sector } = require("../db");
+const { Mongoose } = require("mongoose");
 const router = Router();
 
 
@@ -32,11 +33,36 @@ router.get('/sectors', async (req, res) => {
     res.send(reducedData)
 });
 
-router.post('/sectors/:sectorId', userMiddleware, (req, res) => {
-
+router.post('/sectors/:sectorId', userMiddleware, async (req, res) => {
+    const sectorId = req.params.sectorId;
+    const username = req.headers.username;
+    try {
+        await User.updateOne({
+            username: username
+        }, {
+            "$push": {
+                mysectors: sectorId
+            }
+        })
+    } catch(e) {
+        console.log(e)
+    }
+    res.json({
+        message: "Sector Added!"
+    })
 });
 
-router.get('/my-sectors', userMiddleware,(req, res) => {
-
+router.get('/my-sectors', userMiddleware, async (req, res) => {
+    const response = await User.findOne({
+        username: req.headers.username
+    });
+    const sectors = await Sector.find({
+        _id: {
+            "$in": response.mysectors
+        }
+    })
+    res.json({
+        sectors: sectors
+    });
 })
 module.exports = router;
